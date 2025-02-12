@@ -1,0 +1,70 @@
+﻿<!--
+// Author:
+//   Michael Göricke
+//
+// Copyright (c) 2025
+//
+// This file is part of LocalTestServer.
+//
+// LocalTestServer is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program. If not, see<http://www.gnu.org/licenses/> .-->
+
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--  colors  -->
+
+    <Color x:Key="WindowBackgroundColor">#FF202020</Color>
+    <Color x:Key="ForegroundColor">#FFFFFF</Color>
+
+    <Color x:Key="ScrollbarThumbColor">#FFC0C0C0</Color>
+    <Color x:Key="ScrollViewerBackgroundColor">Transparent</Color>
+    <Color x:Key="BoxBackgroundColor">#FF303030</Color>
+    <Color x:Key="BoxBorderColor">#1d1d1d</Color>
+    <Color x:Key="HyperlinkTextColor">#FF8888FF</Color>
+    <Color x:Key="MouseOverHyperlinkTextColor">#FF6666FF</Color>
+    <Color x:Key="DisabledTextColor">#FF888888</Color>
+    <Color x:Key="ButtonHoverBackgroundColor">#FF444444</Color>
+    <Color x:Key="ButtonPressedTextColor">#FFbbbbbb</Color>
+    <Color x:Key="BorderErrorBorderColor">#FFAA0000</Color>
+
+    <!--  brushes  -->
+
+    <SolidColorBrush x:Key="WindowBackgroundBrush"
+                     Color="{StaticResource WindowBackgroundColor}" />
+    <SolidColorBrush x:Key="ForegroundBrush"
+                     Color="{StaticResource ForegroundColor}" />
+    <SolidColorBrush x:Key="ButtonPressedTextBrush"
+                     Color="{StaticResource ButtonPressedTextColor}" />
+
+    <SolidColorBrush x:Key="ScrollbarThumbBrush"
+                     Color="{StaticResource ScrollbarThumbColor}" />
+    <SolidColorBrush x:Key="ScrollViewerBackgroundBrush"
+                     Color="{StaticResource ScrollViewerBackgroundColor}" />
+
+    <SolidColorBrush x:Key="BoxBackgroundBrush"
+                     Color="{StaticResource BoxBackgroundColor}" />
+    <SolidColorBrush x:Key="BoxBorderBrush"
+                     Color="{StaticResource BoxBorderColor}" />
+
+    <SolidColorBrush x:Key="HyperlinkTextBrush"
+                     Color="{StaticResource HyperlinkTextColor}" />
+    <SolidColorBrush x:Key="MouseOverHyperlinkTextBrush"
+                     Color="{StaticResource MouseOverHyperlinkTextColor}" />
+    <SolidColorBrush x:Key="DisabledTextBrush"
+                     Color="{StaticResource DisabledTextColor}" />
+    <SolidColorBrush x:Key="ButtonHoverBackgroundBrush"
+                     Color="{StaticResource ButtonHoverBackgroundColor}" />
+
+    <SolidColorBrush x:Key="BorderErrorBorderBrush"
+                     Color="{StaticResource BorderErrorBorderColor}" />
+</ResourceDictionary>

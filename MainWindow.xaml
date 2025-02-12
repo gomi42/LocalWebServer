@@ -1,0 +1,129 @@
+﻿<!--
+// Author:
+//   Michael Göricke
+//
+// Copyright (c) 2025
+//
+// This file is part of LocalTestServer.
+//
+// LocalTestServer is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program. If not, see<http://www.gnu.org/licenses/> .-->
+
+<Window x:Class="WebServer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:p="clr-namespace:WebServer.Properties"
+        xmlns:s="clr-namespace:WebServer"
+        Title="{x:Static p:Resources.WindowTitle}"
+        Width="384"
+        Height="200"
+        MinWidth="384"
+        MinHeight="200"
+        d:DataContext="{d:DesignInstance Type=s:DesignViewModel,
+                                         IsDesignTimeCreatable=True}"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        UseLayoutRounding="True"
+        mc:Ignorable="d">
+    <Grid>
+        <ScrollViewer Background="{x:Null}"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer, Mode=FindAncestor}}">
+                <Grid Margin="15,10,10,3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Margin="0,0,10,0"
+                               VerticalAlignment="Top"
+                               Style="{DynamicResource TextBlockStyle}"
+                               Text="{x:Static p:Resources.Welcome}"
+                               TextWrapping="Wrap" />
+                    <ToggleButton x:Name="ThemeButton"
+                                  Grid.Column="1"
+                                  Width="20"
+                                  Height="20"
+                                  Padding="4"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  Checked="ThemeButtonChecked"
+                                  Style="{DynamicResource ThemeButtonStyle}"
+                                  ToolTip="{x:Static p:Resources.ToggleThemeTooltip}"
+                                  Unchecked="ThemeButtonUnchecked" />
+                </Grid>
+                <Button Grid.Row="2"
+                        Margin="0,0,10,1"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Command="{Binding AddServerCommand}"
+                        Style="{StaticResource ButtonAddStyle}"
+                        ToolTip="{x:Static p:Resources.AddServer}" />
+
+                <ItemsControl ItemsSource="{Binding Servers}"
+                              Visibility="Visible">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <s:DragDropBorder Margin="10,0,10,10"
+                                              DropCommand="{Binding DropCommand}"
+                                              Style="{StaticResource BorderBoxStyle}">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock HorizontalAlignment="Left"
+                                               FontSize="14"
+                                               Style="{StaticResource TextBlockStyle}">
+                                        <Run Text="{x:Static p:Resources.Server}" />
+                                        <Run Text="{Binding ServerNumber, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <s:FolderTextBlock Margin="0,0,5,0"
+                                                            HorizontalAlignment="Stretch"
+                                                            VerticalAlignment="Top"
+                                                            Folder="{Binding Folder}" />
+                                        <Button Grid.Column="1"
+                                                Click="ShowMenuClicked"
+                                                Content="..."
+                                                Style="{StaticResource ButtonEllipsisStyle}"
+                                                ToolTip="{x:Static p:Resources.SelectFolder}" />
+                                    </Grid>
+                                    <Button Margin="0,5,0,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Bottom"
+                                            Command="{Binding HyperlinkCommand}"
+                                            Content="{Binding Hyperlink}"
+                                            IsEnabled="{Binding IsHyperlinkEnabled}"
+                                            Style="{StaticResource ButtonHyperlinkStyle}" />
+                                </StackPanel>
+                            </s:DragDropBorder>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Border Margin="10,0"
+                        BorderBrush="{StaticResource BorderErrorBorderBrush}"
+                        Style="{StaticResource BorderBoxStyle}"
+                        Visibility="{Binding ShowError,
+                                             Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Margin="15"
+                               VerticalAlignment="Top"
+                               Style="{StaticResource TextBlockStyle}"
+                               Text="{x:Static p:Resources.CannotRunServer}"
+                               TextWrapping="WrapWithOverflow" />
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
