@@ -36,7 +36,6 @@ namespace WebServer
     public class SimpleWebServer
     {
         private const string GomiTestServerStyle = "GomiTestServerStyle.css";
-        private const string IndexPhpFilename = "index.php";
         private const string HtaccessFilename = ".htaccess";
         private const string PhpExeLocation = "php\\php.exe";
         private const string LocalHost = "http://localhost";
@@ -219,7 +218,7 @@ namespace WebServer
 
                 if (!string.IsNullOrEmpty(phpExecutable) && Path.GetExtension(fileName).ToLower() == ".php")
                 {
-                    ExecutePhp(rootDir, IndexPhpFilename, url, out string result);
+                    ExecutePhp(rootDir, fileName, url, out string result);
                     byte[] buffer3 = Encoding.UTF8.GetBytes(result);
                     response.OutputStream.Write(buffer3, 0, buffer3.Length);
                     response.ContentType = MimeHelper.GetMimeType(".html");
