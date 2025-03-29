@@ -163,11 +163,29 @@ namespace WebServer
                 return;
             }
 
-            int min = 10;
+            var limitedFolderMin = FolderNameHelper.LimitPath(Folder, 1);
+            var formattedTextMin = new FormattedText(limitedFolderMin,
+                                            CultureInfo.CurrentUICulture,
+                                            FlowDirection,
+                                            new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
+                                            FontSize,
+                                            Foreground,
+                                            1);
+
+            if (formattedTextMin.Width > ActualWidth)
+            {
+                fullFormattedText.MaxTextWidth = ActualWidth;
+                fullFormattedText.MaxTextHeight = ActualHeight;
+                fullFormattedText.Trimming = TextTrimming.CharacterEllipsis;
+                ctx.DrawText(fullFormattedText, new Point(0, 0));
+                return;
+            }
+
+            int min = limitedFolderMin.Length;
             int max = Folder.Length - 1;
             FormattedText lastFit = null;
 
-            while (max - min > 5)
+            while (max - min > 1)
             {
                 var current = (max - min) / 2 + min;
                 var limitedFolder = FolderNameHelper.LimitPath(Folder, current);
@@ -182,15 +200,7 @@ namespace WebServer
                 if (formattedText.Width > ActualWidth)
                 {
                     var len = limitedFolder.Length;
-
-                    if (len > current)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        max = len;
-                    }
+                    max = len;
                 }
                 else
                 {
