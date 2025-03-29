@@ -20,7 +20,7 @@ The PHP installation is optional and not required. In order to install the PHP i
 
 ### .htaccess Emulation
 
-The .htaccess emulation is very basic and supports at the moment the 3 most important commands. 2 with limited features. But they serve the common use case to redirect any link to a file:
+The .htaccess emulation is very basic and supports at the moment the most important commands. Most with limited features. But they serve the common use case to redirect any link to a file:
 
 ```
 RewriteEngine on
@@ -33,6 +33,11 @@ This command is fully supported. The syntax is:
 
 `RewriteEngine on|off`
 
+#### RewriteBase
+This command is fully supported. The syntax is:
+
+`RewriteBase <urlPath>`
+
 #### RewriteCond
 This command is the most limited at the moment and allows only fixed parameters. The syntax is:
 
@@ -42,7 +47,7 @@ This command is the most limited at the moment and allows only fixed parameters.
 
 *condition*: only `-f` is supported. The negation of the condition with a leading `!` is supported.
 
-*options**: the option `OR` is supported
+*options*: the option `OR` is supported
 
 #### RewriteRule
 A small subset of the features is supported. The syntax is:
@@ -51,7 +56,7 @@ A small subset of the features is supported. The syntax is:
 
 *regular expression*: any valid regular expression. The negation of the condition with a leading `!` is supported.
 
-*substitution*: must be a local file starting with a '/'
+*substitution*: must be a local file, if the file doesn't start with a '/' the 'urlPath' from the 'RewriteBase' statement is prepended.
 
 *options*: are ignored
 

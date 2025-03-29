@@ -198,24 +198,18 @@ namespace WebServer
 
             try
             {
+                // 1: our special CSS file that we pretend to exist in the root?
                 if (fileName == Path.Combine(rootDir, GomiTestServerStyle))
                 {
                     var sri = System.Windows.Application.GetResourceStream(new Uri(GomiTestServerStyle, UriKind.Relative));
-
-                    var buffer1 = new byte[1024 * 16];
-                    int nbytes1;
-
-                    while ((nbytes1 = sri.Stream.Read(buffer1, 0, buffer1.Length)) > 0)
-                    {
-                        response.OutputStream.Write(buffer1, 0, nbytes1);
-                    }
-
-                    response.ContentType = MimeHelper.GetMimeType(fileName);
+                    ProcessStreamAsResponse(sri.Stream, fileName, response);
                     return;
                 }
 
+                // 2: apply .htaccess rules
                 fileName = ApplyHtaccess(rootDir, url, fileName);
 
+                // 3: process PHP file?
                 if (!string.IsNullOrEmpty(phpExecutable) && Path.GetExtension(fileName).ToLower() == ".php")
                 {
                     ExecutePhp(rootDir, fileName, url, out string result);
@@ -225,6 +219,7 @@ namespace WebServer
                     return;
                 }
 
+                // 4: show a directory listing?
                 if (Directory.Exists(fileName))
                 {
                     var listing = GetDirectoryListing(rootDir, fileName);
@@ -234,21 +229,12 @@ namespace WebServer
                     return;
                 }
 
-                response.ContentType = MimeHelper.GetMimeType(fileName);
-
+                // 5: try to return the requested file
                 fileStream = new FileStream(fileName, FileMode.Open);
-
-                var buffer = new byte[1024 * 16];
-                int nbytes;
-
-                while ((nbytes = fileStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    response.OutputStream.Write(buffer, 0, nbytes);
-                }
+                ProcessStreamAsResponse(fileStream, fileName, response);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine("error serving file", e);
                 response.StatusCode = 404;
             }
             finally
@@ -256,6 +242,21 @@ namespace WebServer
                 fileStream?.Close();
                 response.OutputStream.Close();
             }
+        }
+
+        ////////////////////////////////////////////////////////////////////
+
+        private void ProcessStreamAsResponse(Stream stream, string filename, HttpListenerResponse response)
+        {
+                response.ContentType = MimeHelper.GetMimeType(filename);
+
+                var buffer = new byte[1024 * 16];
+                int nbytes;
+
+                while ((nbytes = stream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    response.OutputStream.Write(buffer, 0, nbytes);
+                }
         }
 
         ////////////////////////////////////////////////////////////////////
@@ -435,8 +436,13 @@ namespace WebServer
         // https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html
         private Regex cmdPattern = new Regex(@"^ *(?<command>[^ ]+) +(?<params>.+)$", RegexOptions.IgnoreCase);
         private Regex enginePattern = new Regex(@"^(?<onoff>on|off) *$", RegexOptions.IgnoreCase);
+
+        // RewriteBase url
+        private Regex basePattern = new Regex(@"^(?<url>[^ ]+)$", RegexOptions.IgnoreCase);
+
         // RewriteCond %{REQUEST_FILENAME} !-f
         private Regex condPattern = new Regex(@"^(?<testString>[^ ]+) +(?<not>!)? *(?<condition>[^ ]+)( +\[(?<options>.+)\])?$", RegexOptions.IgnoreCase);
+
         // RewriteRule ^(.*)$ /index.php [ABC]
         private Regex rulePattern = new Regex(@"^(?<not>!)? *(?<pattern>[^ ]+) +(?<substitution>[^ ]+)( +\[(?<options>.+)\])?$", RegexOptions.IgnoreCase);
 
@@ -453,6 +459,7 @@ namespace WebServer
             bool isConditionSet = false;
             bool conditionValue = false;
             bool isOrSet = false;
+            string baseDir = string.Empty;
 
             using (StreamReader sr = new StreamReader(ht))
             {
@@ -497,8 +504,20 @@ namespace WebServer
                                 break;
                             }
 
+                            case "RewriteBase":
+                            {
+                                var match2 = basePattern.Match(parameters);
+
+                                if (match2.Success)
+                                {
+                                    baseDir = match2.Groups["url"].Value;
+                                }
+                                break;
+                            }
+
                             case "RewriteCond":
                             {
+
                                 if (!isEngineOn)
                                 {
                                     break;
@@ -577,7 +596,22 @@ namespace WebServer
 
                                     if (success)
                                     {
-                                        var urlRel = substitution.Substring(1);
+                                        string urlRel;
+
+                                        if (substitution[0] == '/')
+                                        {
+                                            urlRel = substitution.Substring(1);
+                                        }
+                                        else
+                                        {
+                                            urlRel = baseDir + substitution;
+
+                                            if (urlRel[0] == '/')
+                                            {
+                                                urlRel = urlRel.Substring(1);
+                                            }
+                                        }
+
                                         var fileName = Path.Combine(rootDir, urlRel);
                                         fileName = WebUtility.UrlDecode(fileName);
 
