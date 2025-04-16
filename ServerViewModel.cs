@@ -151,15 +151,20 @@ namespace WebServer
                 Folder = fileOrFolder;
                 IsHyperlinkEnabled = true;
                 webServer.SetPortRootMapping(Port, fileOrFolder);
-                Process.Start(SimpleWebServer.FormatHostUri(Port));
+                var url = SimpleWebServer.FormatHostUri(Port);
+                Hyperlink = url;
+                Process.Start(url);
             }
             else
             {
                 var folder = Path.GetDirectoryName(fileOrFolder);
+                var filename = Path.GetFileName(fileOrFolder);
                 Folder = folder;
                 IsHyperlinkEnabled = true;
                 webServer.SetPortRootMapping(Port, folder);
-                Process.Start(SimpleWebServer.FormatHostUri(Port) + Path.GetFileName(fileOrFolder));
+                var url = SimpleWebServer.FormatHostUri(Port) + filename;
+                Hyperlink = url;
+                Process.Start(url);
             }
         }
 
@@ -167,7 +172,7 @@ namespace WebServer
 
         private void OnHyperlinkCommand()
         {
-            Process.Start(SimpleWebServer.FormatHostUri(Port));
+            Process.Start(Hyperlink);
         }
     }
 }
