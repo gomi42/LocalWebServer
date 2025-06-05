@@ -37,7 +37,7 @@ namespace WebServer
             //System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en");
             InitializeComponent();
 
-            ThemeSettings.SetThemeData("pack://application:,,,/Local Test Server;component/",
+            ThemeSettings.SetThemeData("pack://application:,,,/Test Server;component/",
                                 "DarkModeColors.xaml",
                                 "LightModeColors.xaml",
                                 "Styles.xaml");

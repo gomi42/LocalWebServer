@@ -155,7 +155,8 @@ namespace WebServer
 
         private void HandleRequests()
         {
-            while (!httpListener.IsListening) {}
+            while (!httpListener.IsListening)
+            { }
 
             try
             {
@@ -177,7 +178,7 @@ namespace WebServer
             var context = (HttpListenerContext)obj;
             var request = context.Request;
             var response = context.Response;
-            
+
             var uri = request.Url;
             var addr = $"{uri.Scheme}://{uri.Authority}/";
 
@@ -202,7 +203,7 @@ namespace WebServer
                 if (fileName == Path.Combine(rootDir, GomiTestServerStyle))
                 {
                     var sri = System.Windows.Application.GetResourceStream(new Uri(GomiTestServerStyle, UriKind.Relative));
-                    ProcessStreamAsResponse(sri.Stream, fileName, response);
+                    SendStreamAsResponse(sri.Stream, fileName, response);
                     return;
                 }
 
@@ -213,25 +214,33 @@ namespace WebServer
                 if (!string.IsNullOrEmpty(phpExecutable) && Path.GetExtension(fileName).ToLower() == ".php")
                 {
                     ExecutePhp(rootDir, fileName, url, out string result);
-                    byte[] buffer3 = Encoding.UTF8.GetBytes(result);
-                    response.OutputStream.Write(buffer3, 0, buffer3.Length);
-                    response.ContentType = MimeHelper.GetMimeType(".html");
+                    SendStringAsResponse(result, ".html", response);
                     return;
                 }
 
-                // 4: show a directory listing?
+                // 4: is the given link an existing directory?
                 if (Directory.Exists(fileName))
                 {
-                    var listing = GetDirectoryListing(rootDir, fileName);
-                    byte[] buffer2 = Encoding.UTF8.GetBytes(listing);
-                    response.OutputStream.Write(buffer2, 0, buffer2.Length);
-                    response.ContentType = MimeHelper.GetMimeType(".html");
-                    return;
+                    var indexhtml = Path.Combine(fileName, "index.html");
+
+                    // 4a: does an index file exist?
+                    if (File.Exists(indexhtml))
+                    {
+                        fileStream = new FileStream(indexhtml, FileMode.Open);
+                        SendStreamAsResponse(fileStream, indexhtml, response);
+                    }
+                    else
+                    {
+                        // 4b: show a directory listing
+                        var listing = GetDirectoryListing(rootDir, fileName);
+                        SendStringAsResponse(listing, ".html", response);
+                        return;
+                    }
                 }
 
                 // 5: try to return the requested file
                 fileStream = new FileStream(fileName, FileMode.Open);
-                ProcessStreamAsResponse(fileStream, fileName, response);
+                SendStreamAsResponse(fileStream, fileName, response);
             }
             catch (Exception)
             {
@@ -246,17 +255,26 @@ namespace WebServer
 
         ////////////////////////////////////////////////////////////////////
 
-        private void ProcessStreamAsResponse(Stream stream, string filename, HttpListenerResponse response)
+        private void SendStringAsResponse(string str, string fileextension, HttpListenerResponse response)
         {
-                response.ContentType = MimeHelper.GetMimeType(filename);
+            byte[] buffer2 = Encoding.UTF8.GetBytes(str);
+            response.OutputStream.Write(buffer2, 0, buffer2.Length);
+            response.ContentType = MimeHelper.GetMimeType(fileextension);
+        }
 
-                var buffer = new byte[1024 * 16];
-                int nbytes;
+        ////////////////////////////////////////////////////////////////////
 
-                while ((nbytes = stream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    response.OutputStream.Write(buffer, 0, nbytes);
-                }
+        private void SendStreamAsResponse(Stream stream, string filename, HttpListenerResponse response)
+        {
+            response.ContentType = MimeHelper.GetMimeType(filename);
+
+            var buffer = new byte[1024 * 16];
+            int nbytes;
+
+            while ((nbytes = stream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                response.OutputStream.Write(buffer, 0, nbytes);
+            }
         }
 
         ////////////////////////////////////////////////////////////////////

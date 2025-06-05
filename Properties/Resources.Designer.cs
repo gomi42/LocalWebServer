@@ -133,7 +133,7 @@ namespace WebServer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Local Test Server.
+        ///   Looks up a localized string similar to Test Server.
         /// </summary>
         public static string WindowTitle {
             get {
