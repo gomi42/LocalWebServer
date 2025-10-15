@@ -20,16 +20,18 @@
 // along with this program. If not, see<http://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace WebServer
 {
@@ -40,22 +42,27 @@ namespace WebServer
         private const string PhpExeLocation = "php\\php.exe";
         private const string LocalHost = "http://localhost";
 
-        private HttpListener httpListener;
+        private WebApplication webApplication;
         private string phpExecutable;
-        private Dictionary<string, string> prefixRootMappings;
+        private Dictionary<int, string> prefixRootMappings;
+
+        ////////////////////////////////////////////////////////////////////
+
+        public const int MaxPorts = 5;
+        public const int InitialPort = 8080;
 
         ////////////////////////////////////////////////////////////////////
 
         public SimpleWebServer()
         {
-            prefixRootMappings = new Dictionary<string, string>();
+            prefixRootMappings = new Dictionary<int, string>();
 
             var loc = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             phpExecutable = Path.Combine(loc, PhpExeLocation);
 
             if (!File.Exists(phpExecutable))
             {
-                Regex baseDirPattern = new Regex(@"^(?<basedir>.*)\\(bin\\(Debug|Release))$", RegexOptions.IgnoreCase);
+                Regex baseDirPattern = new Regex(@"^(?<basedir>.*)\\(bin\\(Debug|Release)\\.*)$", RegexOptions.IgnoreCase);
                 var match = baseDirPattern.Match(loc);
 
                 if (match.Success)
@@ -74,21 +81,36 @@ namespace WebServer
                 }
             }
 
-            httpListener = new HttpListener();
+            var builder = WebApplication.CreateBuilder();
+            var urls = new string[MaxPorts];
+
+            for (int i = 0; i < MaxPorts; i++)
+            {
+                urls[i] = FormatHostUri(i + InitialPort);
+            }
+
+            builder.WebHost.UseUrls(urls);
+            webApplication = builder.Build();
+
+            webApplication.MapGet("{*path}",
+                                    async (HttpContext context) =>
+                                    {
+                                        await ProcessRequest(context);
+                                    });
+
+            webApplication.StartAsync();
         }
 
         ////////////////////////////////////////////////////////////////////
 
         public void AddPort(int port)
         {
-            httpListener.Prefixes.Add(FormatHostUri(port));
         }
 
         ////////////////////////////////////////////////////////////////////
 
         public void ClearAllPorts()
         {
-            httpListener?.Prefixes.Clear();
             prefixRootMappings.Clear();
         }
 
@@ -96,12 +118,7 @@ namespace WebServer
 
         public void SetPortRootMapping(int port, string rootDir)
         {
-            var host = FormatHostUri(port);
-
-            if (!httpListener.Prefixes.Contains(host))
-            {
-                throw new ArgumentException("Port not registered");
-            }
+            var host = port;
 
             if (prefixRootMappings.ContainsKey(host))
             {
@@ -122,74 +139,27 @@ namespace WebServer
 
         ////////////////////////////////////////////////////////////////////
 
-        public bool Start()
-        {
-            try
-            {
-                httpListener.Start();
-            }
-            catch
-            {
-                httpListener = null;
-                return false;
-            }
-
-            Task.Run(HandleRequests);
-            return true;
-        }
-
-        ////////////////////////////////////////////////////////////////////
-
         public void Stop()
         {
-            try
-            {
-                httpListener.Stop();
-            }
-            catch
-            {
-            }
+            webApplication.StopAsync();
         }
 
         ////////////////////////////////////////////////////////////////////
 
-        private void HandleRequests()
+        private async Task ProcessRequest(HttpContext context)
         {
-            while (!httpListener.IsListening)
-            { }
-
-            try
-            {
-                while (true)
-                {
-                    HttpListenerContext context = httpListener.GetContext();
-                    ThreadPool.QueueUserWorkItem(ProcessRequest, context);
-                }
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        ////////////////////////////////////////////////////////////////////
-
-        private void ProcessRequest(object obj)
-        {
-            var context = (HttpListenerContext)obj;
             var request = context.Request;
             var response = context.Response;
 
-            var uri = request.Url;
-            var addr = $"{uri.Scheme}://{uri.Authority}/";
+            var port = context.Connection.LocalPort;
 
-            if (!prefixRootMappings.TryGetValue(addr, out string rootDir))
+            if (!prefixRootMappings.TryGetValue(port, out string rootDir))
             {
                 response.StatusCode = 404;
-                response.OutputStream.Close();
                 return;
             }
 
-            var url = uri.AbsolutePath;
+            var url = request.Path.Value;
 
             var urlRel = url.Substring(1);
             var fileName = Path.Combine(rootDir, urlRel);
@@ -203,7 +173,7 @@ namespace WebServer
                 if (fileName == Path.Combine(rootDir, GomiTestServerStyle))
                 {
                     var sri = System.Windows.Application.GetResourceStream(new Uri(GomiTestServerStyle, UriKind.Relative));
-                    SendStreamAsResponse(sri.Stream, fileName, response);
+                    await SendStreamAsResponse(sri.Stream, fileName, response);
                     return;
                 }
 
@@ -214,7 +184,7 @@ namespace WebServer
                 if (!string.IsNullOrEmpty(phpExecutable) && Path.GetExtension(fileName).ToLower() == ".php")
                 {
                     ExecutePhp(rootDir, fileName, url, out string result);
-                    SendStringAsResponse(result, ".html", response);
+                    await SendStringAsResponse(result, ".html", response);
                     return;
                 }
 
@@ -227,20 +197,20 @@ namespace WebServer
                     if (File.Exists(indexhtml))
                     {
                         fileStream = new FileStream(indexhtml, FileMode.Open);
-                        SendStreamAsResponse(fileStream, indexhtml, response);
+                        await SendStreamAsResponse(fileStream, indexhtml, response);
                     }
                     else
                     {
                         // 4b: show a directory listing
                         var listing = GetDirectoryListing(rootDir, fileName);
-                        SendStringAsResponse(listing, ".html", response);
+                        await SendStringAsResponse(listing, ".html", response);
                         return;
                     }
                 }
 
                 // 5: try to return the requested file
                 fileStream = new FileStream(fileName, FileMode.Open);
-                SendStreamAsResponse(fileStream, fileName, response);
+                await SendStreamAsResponse(fileStream, fileName, response);
             }
             catch (Exception)
             {
@@ -249,22 +219,22 @@ namespace WebServer
             finally
             {
                 fileStream?.Close();
-                response.OutputStream.Close();
             }
         }
 
         ////////////////////////////////////////////////////////////////////
 
-        private void SendStringAsResponse(string str, string fileextension, HttpListenerResponse response)
+        private async Task SendStringAsResponse(string str, string fileextension, HttpResponse response)
         {
             byte[] buffer2 = Encoding.UTF8.GetBytes(str);
-            response.OutputStream.Write(buffer2, 0, buffer2.Length);
             response.ContentType = MimeHelper.GetMimeType(fileextension);
+            await response.Body.WriteAsync(buffer2);
+            await response.Body.FlushAsync();
         }
 
         ////////////////////////////////////////////////////////////////////
 
-        private void SendStreamAsResponse(Stream stream, string filename, HttpListenerResponse response)
+        private async Task SendStreamAsResponse(Stream stream, string filename, HttpResponse response)
         {
             response.ContentType = MimeHelper.GetMimeType(filename);
 
@@ -273,8 +243,10 @@ namespace WebServer
 
             while ((nbytes = stream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                response.OutputStream.Write(buffer, 0, nbytes);
+                await response.Body.WriteAsync(buffer, 0, nbytes);
             }
+
+            await response.Body.FlushAsync();
         }
 
         ////////////////////////////////////////////////////////////////////
@@ -435,6 +407,7 @@ namespace WebServer
             myProcess.StartInfo.RedirectStandardOutput = true;
             myProcess.StartInfo.WorkingDirectory = rootDir;
             myProcess.StartInfo.EnvironmentVariables.Add("REQUEST_URI", uri);
+            myProcess.StartInfo.EnvironmentVariables.Add("PHP_DOCUMENT_ROOT", rootDir.Replace('\\', '/'));
 
             myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 

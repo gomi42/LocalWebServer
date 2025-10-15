@@ -21,6 +21,7 @@
 
 using System;
 using System.Windows;
+using Microsoft.Win32;
 
 namespace WebServer
 {
@@ -32,6 +33,8 @@ namespace WebServer
         {
             base.OnStartup(e);
 
+            SystemEvents.SessionEnding += OnSessionEnding;
+
             window = new MainWindow();
             window.DataContext = new MainViewModel();
             window.Show();
@@ -40,6 +43,21 @@ namespace WebServer
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
+            ShutdownApp();
+        }
+
+        private void OnSessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            SystemEvents.SessionEnding -= OnSessionEnding;
+
+            if (e.Reason == SessionEndReasons.SystemShutdown)
+            {
+                ShutdownApp();
+            }
+        }
+
+        private void ShutdownApp()
+        {
             LruManager.Instance.Save();
 
             if (window.DataContext is IDisposable disposable)

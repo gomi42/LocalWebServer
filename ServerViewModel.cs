@@ -153,7 +153,11 @@ namespace WebServer
                 webServer.SetPortRootMapping(Port, fileOrFolder);
                 var url = SimpleWebServer.FormatHostUri(Port);
                 Hyperlink = url;
-                Process.Start(url);
+                Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = url,
+                                    UseShellExecute = true
+                                });
             }
             else
             {
@@ -164,7 +168,11 @@ namespace WebServer
                 webServer.SetPortRootMapping(Port, folder);
                 var url = SimpleWebServer.FormatHostUri(Port) + filename;
                 Hyperlink = url;
-                Process.Start(url);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
             }
         }
 

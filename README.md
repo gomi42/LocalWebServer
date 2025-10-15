@@ -1,5 +1,5 @@
 # Local Test Server
-This small and light weight local test server enables you to test local files in your browser. The server supports php files and runs the php interpreter (if available). See .htaccess support below. You can create up to 10 servers, each server serves its own root folder. Click on `+` to add a new server.
+This small and light weight local test server enables you to test local files in your browser. The server supports php files and runs the php interpreter (if available). See .htaccess support below. You can create up to 5 servers, each server serves its own root folder. Click on `+` to add a new server.
 
 To enable a server just drag & drop a folder or a file (usually a .html file) onto a server box (Server 1, Server 2, etc.). The root folder is then displayed in the server box. Drop a folder or a file onto a server's box:
 

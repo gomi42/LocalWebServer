@@ -28,7 +28,6 @@ namespace WebServer
 {
     internal class MainViewModel : ViewModelBase, IDisposable
     {
-        const int initialPort = 8080;
         private SimpleWebServer webServer;
         private ObservableCollection<ServerViewModel> servers;
         private bool showError;
@@ -86,14 +85,10 @@ namespace WebServer
             {
                 webServer = new SimpleWebServer();
             }
-            else
-            {
-                webServer.Stop();
-            }
 
             var last = servers.Count - 1;
 
-            if (last >= 9)
+            if (last >= SimpleWebServer.MaxPorts)
             {
                 return;
             }
@@ -106,21 +101,10 @@ namespace WebServer
             }
             else
             {
-                port = initialPort;
+                port = SimpleWebServer.InitialPort;
             }
 
             servers.Add(new ServerViewModel(webServer, last + 1, port));
-
-            if (!webServer.Start())
-            {
-                Servers.Clear();
-                webServer = null;
-                ShowError = true;
-            }
-            else
-            {
-                ShowError = false;
-            }
         }
     }
 }
