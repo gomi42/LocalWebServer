@@ -196,7 +196,7 @@ namespace WebServer
                     // 4a: does an index file exist?
                     if (File.Exists(indexhtml))
                     {
-                        fileStream = new FileStream(indexhtml, FileMode.Open);
+                        fileStream = File.OpenRead(indexhtml);
                         await SendStreamAsResponse(fileStream, indexhtml, response);
                     }
                     else
@@ -209,7 +209,7 @@ namespace WebServer
                 }
 
                 // 5: try to return the requested file
-                fileStream = new FileStream(fileName, FileMode.Open);
+                fileStream = File.OpenRead(fileName);
                 await SendStreamAsResponse(fileStream, fileName, response);
             }
             catch (Exception)
@@ -226,10 +226,8 @@ namespace WebServer
 
         private async Task SendStringAsResponse(string str, string fileextension, HttpResponse response)
         {
-            byte[] buffer2 = Encoding.UTF8.GetBytes(str);
             response.ContentType = MimeHelper.GetMimeType(fileextension);
-            await response.Body.WriteAsync(buffer2);
-            await response.Body.FlushAsync();
+            await response.WriteAsync(str);
         }
 
         ////////////////////////////////////////////////////////////////////
@@ -237,16 +235,7 @@ namespace WebServer
         private async Task SendStreamAsResponse(Stream stream, string filename, HttpResponse response)
         {
             response.ContentType = MimeHelper.GetMimeType(filename);
-
-            var buffer = new byte[1024 * 16];
-            int nbytes;
-
-            while ((nbytes = stream.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                await response.Body.WriteAsync(buffer, 0, nbytes);
-            }
-
-            await response.Body.FlushAsync();
+            await stream.CopyToAsync(response.Body);
         }
 
         ////////////////////////////////////////////////////////////////////
