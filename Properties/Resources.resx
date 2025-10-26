@@ -144,4 +144,7 @@
   <data name="WindowTitle" xml:space="preserve">
     <value>Test Server</value>
   </data>
+  <data name="SendFakeServer" xml:space="preserve">
+    <value>Simulate "www.test.com" instead of "localhost"</value>
+  </data>
 </root>

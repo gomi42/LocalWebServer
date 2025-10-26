@@ -106,6 +106,15 @@ namespace WebServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Simulate &quot;www.test.com&quot; instead of &quot;localhost&quot;.
+        /// </summary>
+        public static string SendFakeServer {
+            get {
+                return ResourceManager.GetString("SendFakeServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server.
         /// </summary>
         public static string Server {

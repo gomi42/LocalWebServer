@@ -25,13 +25,14 @@
              xmlns:local="clr-namespace:WebServer">
     <Application.Resources>
         <ResourceDictionary>
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/LightModeColors.xaml" />
                 <!--<ResourceDictionary Source="/DarkModeColors.xaml" />-->
                 <ResourceDictionary Source="/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

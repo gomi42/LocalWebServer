@@ -37,6 +37,12 @@ namespace WebServer
 {
     public class SimpleWebServer
     {
+        class ServerInfo
+        {
+            public string RootDir;
+            public bool SendFakeServer;
+        }
+
         private const string GomiTestServerStyle = "GomiTestServerStyle.css";
         private const string HtaccessFilename = ".htaccess";
         private const string PhpExeLocation = "php\\php.exe";
@@ -44,7 +50,7 @@ namespace WebServer
 
         private WebApplication webApplication;
         private string phpExecutable;
-        private Dictionary<int, string> prefixRootMappings;
+        private Dictionary<int, ServerInfo> prefixRootMappings;
 
         ////////////////////////////////////////////////////////////////////
 
@@ -55,7 +61,7 @@ namespace WebServer
 
         public SimpleWebServer()
         {
-            prefixRootMappings = new Dictionary<int, string>();
+            prefixRootMappings = new Dictionary<int, ServerInfo>();
 
             var loc = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             phpExecutable = Path.Combine(loc, PhpExeLocation);
@@ -120,13 +126,25 @@ namespace WebServer
         {
             var host = port;
 
-            if (prefixRootMappings.ContainsKey(host))
+            if (prefixRootMappings.TryGetValue(host, out var serverInfo))
             {
-                prefixRootMappings[host] = rootDir;
+                serverInfo.RootDir = rootDir;
             }
             else
             {
-                prefixRootMappings.Add(host, rootDir);
+                prefixRootMappings.Add(host, new ServerInfo { RootDir = rootDir });
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////
+
+        public void SetFakeServer(int port, bool sendFakeServer)
+        {
+            var host = port;
+
+            if (prefixRootMappings.TryGetValue(host, out var serverInfo))
+            {
+                serverInfo.SendFakeServer = sendFakeServer;
             }
         }
 
@@ -150,15 +168,17 @@ namespace WebServer
         {
             var request = context.Request;
             var response = context.Response;
+            string rootDir;
 
             var port = context.Connection.LocalPort;
 
-            if (!prefixRootMappings.TryGetValue(port, out string rootDir))
+            if (!prefixRootMappings.TryGetValue(port, out var serverInfo))
             {
                 response.StatusCode = 404;
                 return;
             }
 
+            rootDir = serverInfo.RootDir;
             var url = request.Path.Value;
 
             var urlRel = url.Substring(1);
@@ -183,7 +203,7 @@ namespace WebServer
                 // 3: process PHP file?
                 if (!string.IsNullOrEmpty(phpExecutable) && Path.GetExtension(fileName).ToLower() == ".php")
                 {
-                    ExecutePhp(rootDir, fileName, url, out string result);
+                    ExecutePhp(rootDir, fileName, url, serverInfo.SendFakeServer, out string result);
                     await SendStringAsResponse(result, ".html", response);
                     return;
                 }
@@ -385,7 +405,7 @@ namespace WebServer
 
         ////////////////////////////////////////////////////////////////////
 
-        public int ExecutePhp(string rootDir, string phpFile, string uri, out string result)
+        public int ExecutePhp(string rootDir, string phpFile, string uri, bool sendFakeServer, out string result)
         {
             Process myProcess = new Process();
 
@@ -396,6 +416,7 @@ namespace WebServer
             myProcess.StartInfo.RedirectStandardOutput = true;
             myProcess.StartInfo.WorkingDirectory = rootDir;
             myProcess.StartInfo.EnvironmentVariables.Add("REQUEST_URI", uri);
+            myProcess.StartInfo.EnvironmentVariables.Add("SERVER_NAME", sendFakeServer ? "www.test.com" : "localhost");
             myProcess.StartInfo.EnvironmentVariables.Add("PHP_DOCUMENT_ROOT", rootDir.Replace('\\', '/'));
 
             myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;

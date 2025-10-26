@@ -35,6 +35,7 @@ namespace WebServer
         private string folder;
         private string hyperlink;
         private bool isHyperlinkEnabled;
+        private bool sendFakeServer;
 
         ////////////////////////////////////////////////////////////////////
 
@@ -106,6 +107,18 @@ namespace WebServer
         ////////////////////////////////////////////////////////////////////
 
         public ICommand HyperlinkCommand { get; private set; }
+
+        ////////////////////////////////////////////////////////////////////
+
+        public bool SendFakeServer
+        {
+            get => sendFakeServer;
+            set
+            {
+                SetProperty(ref sendFakeServer, value);
+                webServer.SetFakeServer(Port, value);
+            }
+        }
 
         ////////////////////////////////////////////////////////////////////
 

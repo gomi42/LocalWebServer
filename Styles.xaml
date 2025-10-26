@@ -178,10 +178,10 @@
 
     <Style x:Key="BorderBoxStyle"
            TargetType="{x:Type Border}">
-        <Setter Property="BorderBrush" Value="{DynamicResource BoxBorderBrush}" />
+        <!--<Setter Property="BorderBrush" Value="{DynamicResource BoxBorderBrush}" />
         <Setter Property="Background" Value="{DynamicResource BoxBackgroundBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="CornerRadius" Value="7" />-->
         <Setter Property="VerticalAlignment" Value="Top" />
         <Setter Property="Padding" Value="10,5,10,14" />
     </Style>
@@ -387,6 +387,297 @@
                                                    Mode=OneWay,
                                                    RelativeSource={RelativeSource TemplatedParent}}" />
                     </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="{x:Type CheckBox}"
+           TargetType="{x:Type CheckBox}">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <BulletDecorator Background="Transparent">
+                        <BulletDecorator.Bullet>
+                            <Grid Width="13"
+                                  Height="13"
+                                  Margin="0,1,0,0"
+                                  VerticalAlignment="Center">
+                                <Border x:Name="Border"
+                                        Background="Transparent"
+                                        BorderBrush="#ff626262"
+                                        BorderThickness="1"
+                                        CornerRadius="2">
+                                    <Grid Margin="0,1,0,0">
+                                        <Path x:Name="CheckMark"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Data="M 0 3 L 3 5 L 7 0"
+                                              SnapsToDevicePixels="False"
+                                              Stroke="White"
+                                              StrokeThickness="1"
+                                              Visibility="Collapsed" />
+                                        <Path x:Name="InderminateMark"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Data="M 0 7 L 7 0"
+                                              SnapsToDevicePixels="False"
+                                              Stroke="White"
+                                              StrokeThickness="1"
+                                              Visibility="Collapsed" />
+                                    </Grid>
+                                </Border>
+                                <Border x:Name="DisabledBackground"
+                                        Background="{StaticResource CheckBoxBackgroundBrush}"
+                                        BorderBrush="#ff626262"
+                                        BorderThickness="1"
+                                        CornerRadius="2"
+                                        Visibility="Collapsed" />
+                            </Grid>
+                        </BulletDecorator.Bullet>
+                        <ContentPresenter x:Name="Content"
+                                          Margin="7,0,0,0"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Top"
+                                          RecognizesAccessKey="True"
+                                          TextElement.Foreground="{TemplateBinding Foreground}" />
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="MouseOver">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Border"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0.9"
+                                                         Duration="0" />
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Border"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0.8"
+                                                         Duration="0" />
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DisabledBackground"
+                                                                       Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="{x:Static Visibility.Visible}" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ColorAnimation Storyboard.TargetName="Content"
+                                                        Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
+                                                        To="{StaticResource DimmedForegroundColor}"
+                                                        Duration="0" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="CheckStates">
+                                <VisualState x:Name="Checked">
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Border"
+                                                        Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                        To="{StaticResource AccentColor}"
+                                                        Duration="0" />
+                                        <ColorAnimation Storyboard.TargetName="Border"
+                                                        Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                        To="{StaticResource AccentColor}"
+                                                        Duration="0" />
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CheckMark"
+                                                                       Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="{x:Static Visibility.Visible}" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Unchecked" />
+                                <VisualState x:Name="Indeterminate">
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Border"
+                                                        Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                        To="{StaticResource AccentColor}"
+                                                        Duration="0" />
+                                        <ColorAnimation Storyboard.TargetName="Border"
+                                                        Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                        To="{StaticResource AccentColor}"
+                                                        Duration="0" />
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="InderminateMark"
+                                                                       Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="{x:Static Visibility.Visible}" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </BulletDecorator>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <ControlTemplate x:Key="ExpanderToggleButton"
+                     TargetType="{x:Type ToggleButton}">
+        <Border x:Name="Border"
+                Background="Transparent"
+                CornerRadius="0,6,0,0">
+            <Grid Margin="10"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Top">
+                <Path Grid.Column="0"
+                      Width="12"
+                      Height="7"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Top"
+                      Stretch="Uniform"
+                      Stroke="{StaticResource ForegroundBrush}"
+                      StrokeThickness="1">
+                    <Path.Data>
+                        <PathGeometry FillRule="EvenOdd">
+                            <PathFigure x:Name="P1"
+                                        IsClosed="False"
+                                        StartPoint="0,0">
+                                <LineSegment x:Name="P2"
+                                             Point="8,8" />
+                                <LineSegment x:Name="P3"
+                                             Point="16,0" />
+                            </PathFigure>
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
+                <ContentPresenter Grid.Column="0" />
+            </Grid>
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="MouseOver">
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="Border"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="{DynamicResource ButtonHoverBackgroundColor}"
+                                            Duration="0" />
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Pressed" />
+                    <VisualState x:Name="Disabled" />
+                </VisualStateGroup>
+                <VisualStateGroup x:Name="CheckStates">
+                    <VisualState x:Name="Checked">
+                        <Storyboard>
+                            <PointAnimation Storyboard.TargetName="P1"
+                                            Storyboard.TargetProperty="StartPoint"
+                                            To="0,8"
+                                            Duration="0:0:0.3" />
+                            <PointAnimation Storyboard.TargetName="P2"
+                                            Storyboard.TargetProperty="Point"
+                                            To="8,0"
+                                            Duration="0:0:0.3" />
+                            <PointAnimation Storyboard.TargetName="P3"
+                                            Storyboard.TargetProperty="Point"
+                                            To="16,8"
+                                            Duration="0:0:0.3" />
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Unchecked">
+                        <Storyboard>
+                            <PointAnimation Storyboard.TargetName="P1"
+                                            Storyboard.TargetProperty="StartPoint"
+                                            To="0,0"
+                                            Duration="0:0:0.3" />
+                            <PointAnimation Storyboard.TargetName="P2"
+                                            Storyboard.TargetProperty="Point"
+                                            To="8,8"
+                                            Duration="0:0:0.3" />
+                            <PointAnimation Storyboard.TargetName="P3"
+                                            Storyboard.TargetProperty="Point"
+                                            To="16,0"
+                                            Duration="0:0:0.3" />
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Indeterminate">
+                        <Storyboard>
+                            <PointAnimation Storyboard.TargetName="P1"
+                                            Storyboard.TargetProperty="StartPoint"
+                                            To="0,4"
+                                            Duration="0:0:0.3" />
+                            <PointAnimation Storyboard.TargetName="P2"
+                                            Storyboard.TargetProperty="Point"
+                                            To="8,4"
+                                            Duration="0:0:0.3" />
+                            <PointAnimation Storyboard.TargetName="P3"
+                                            Storyboard.TargetProperty="Point"
+                                            To="16,4"
+                                            Duration="0:0:0.3" />
+                        </Storyboard>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+        </Border>
+    </ControlTemplate>
+
+    <Style TargetType="{x:Type Expander}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Expander}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border x:Name="Border"
+                                Grid.Row="0"
+                                Background="{DynamicResource BoxBackgroundBrush}"
+                                BorderBrush="{DynamicResource BoxBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="7">
+                            <Grid>
+                                <ToggleButton Width="37"
+                                              HorizontalAlignment="Right"
+                                              VerticalAlignment="Top"
+                                              FocusVisualStyle="{x:Null}"
+                                              IsChecked="{Binding IsExpanded,
+                                                                  Mode=TwoWay,
+                                                                  RelativeSource={RelativeSource TemplatedParent}}"
+                                              OverridesDefaultStyle="True"
+                                              Template="{StaticResource ExpanderToggleButton}" />
+                                <ContentPresenter Content="{TemplateBinding Header}" />
+                            </Grid>
+                        </Border>
+                        <Border x:Name="Part_ExpandContainer"
+                                Grid.Row="1"
+                                ClipToBounds="True"
+                                Visibility="Collapsed">
+                            <Border x:Name="Part_ExpandSite"
+                                    Grid.Row="1"
+                                    Height="45"
+                                    Background="{DynamicResource BoxBackgroundBrush}"
+                                    BorderBrush="{DynamicResource BoxBorderBrush}"
+                                    BorderThickness="1,0,1,1"
+                                    CornerRadius="0,0,5,5">
+                                <ContentPresenter Margin="10,0,0,0" />
+                            </Border>
+                        </Border>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="MouseOver" />
+                                <VisualState x:Name="Disabled" />
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="Border" Property="CornerRadius" Value="5,5,0,0" />
+                            <Setter TargetName="Part_ExpandContainer" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

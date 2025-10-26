@@ -28,7 +28,7 @@
         xmlns:s="clr-namespace:WebServer"
         Title="{x:Static p:Resources.WindowTitle}"
         Width="384"
-        Height="200"
+        Height="164"
         MinWidth="384"
         MinHeight="200"
         d:DataContext="{d:DesignInstance Type=s:DesignViewModel,
@@ -75,40 +75,47 @@
                               Visibility="Visible">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <s:DragDropBorder Margin="10,0,10,10"
-                                              DropCommand="{Binding DropCommand}"
-                                              Style="{StaticResource BorderBoxStyle}">
-                                <StackPanel VerticalAlignment="Top">
-                                    <TextBlock HorizontalAlignment="Left"
-                                               FontSize="14"
-                                               Style="{StaticResource TextBlockStyle}">
-                                        <Run Text="{x:Static p:Resources.Server}" />
-                                        <Run Text="{Binding ServerNumber, Mode=OneWay}" />
-                                    </TextBlock>
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <s:FolderTextBlock Margin="0,0,5,0"
-                                                            HorizontalAlignment="Stretch"
-                                                            VerticalAlignment="Top"
-                                                            Folder="{Binding Folder}" />
-                                        <Button Grid.Column="1"
-                                                Click="ShowMenuClicked"
-                                                Content="..."
-                                                Style="{StaticResource ButtonEllipsisStyle}"
-                                                ToolTip="{x:Static p:Resources.SelectFolder}" />
-                                    </Grid>
-                                    <Button Margin="0,5,0,0"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Bottom"
-                                            Command="{Binding HyperlinkCommand}"
-                                            Content="{Binding Hyperlink}"
-                                            IsEnabled="{Binding IsHyperlinkEnabled}"
-                                            Style="{StaticResource ButtonHyperlinkStyle}" />
-                                </StackPanel>
-                            </s:DragDropBorder>
+                            <Expander Margin="10,0,10,10">
+                                <Expander.Header>
+                                    <s:DragDropBorder DropCommand="{Binding DropCommand}"
+                                                      Style="{StaticResource BorderBoxStyle}">
+                                        <StackPanel VerticalAlignment="Top">
+                                            <TextBlock HorizontalAlignment="Left"
+                                                       FontSize="14"
+                                                       Style="{StaticResource TextBlockStyle}">
+                                                <Run Text="{x:Static p:Resources.Server}" />
+                                                <Run Text="{Binding ServerNumber, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <Grid Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <s:FolderTextBlock Margin="0,0,5,0"
+                                                                   HorizontalAlignment="Stretch"
+                                                                   VerticalAlignment="Top"
+                                                                   Folder="{Binding Folder}" />
+                                                <Button Grid.Column="1"
+                                                        Click="ShowMenuClicked"
+                                                        Content="..."
+                                                        Style="{StaticResource ButtonEllipsisStyle}"
+                                                        ToolTip="{x:Static p:Resources.SelectFolder}" />
+                                            </Grid>
+                                            <Button Margin="0,5,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Bottom"
+                                                    Command="{Binding HyperlinkCommand}"
+                                                    Content="{Binding Hyperlink}"
+                                                    IsEnabled="{Binding IsHyperlinkEnabled}"
+                                                    Style="{StaticResource ButtonHyperlinkStyle}" />
+                                        </StackPanel>
+                                    </s:DragDropBorder>
+                                </Expander.Header>
+                                <CheckBox Margin="0,13,0,0"
+                                          Content="{x:Static p:Resources.SendFakeServer}"
+                                          IsChecked="{Binding SendFakeServer}"
+                                          IsEnabled="{Binding IsHyperlinkEnabled}" />
+                            </Expander>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

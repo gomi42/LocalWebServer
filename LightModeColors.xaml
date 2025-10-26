@@ -36,6 +36,9 @@
     <Color x:Key="ButtonHoverBackgroundColor">#FFdddddd</Color>
     <Color x:Key="ButtonPressedTextColor">#FF666666</Color>
     <Color x:Key="BorderErrorBorderColor">#FFFF0000</Color>
+    <Color x:Key="DimmedForegroundColor">#FF737373</Color>
+    <Color x:Key="AccentColor">#FF006abb</Color>
+    <Color x:Key="CheckBoxBackgroundColor">#FFEBEBEB</Color>
 
     <!--  brushes  -->
 
@@ -67,4 +70,7 @@
 
     <SolidColorBrush x:Key="BorderErrorBorderBrush"
                      Color="{StaticResource BorderErrorBorderColor}" />
+
+    <SolidColorBrush x:Key="CheckBoxBackgroundBrush"
+                     Color="{StaticResource CheckBoxBackgroundColor}" />
 </ResourceDictionary>
