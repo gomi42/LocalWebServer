@@ -525,16 +525,20 @@
     <ControlTemplate x:Key="ExpanderToggleButton"
                      TargetType="{x:Type ToggleButton}">
         <Border x:Name="Border"
+                Width="19"
+                Height="19"
                 Background="Transparent"
-                CornerRadius="0,6,0,0">
-            <Grid Margin="10"
+                CornerRadius="3">
+            <Grid Margin="2"
                   HorizontalAlignment="Center"
-                  VerticalAlignment="Top">
-                <Path Grid.Column="0"
+                  VerticalAlignment="Center">
+                <Path x:Name="Arrow"
+                      Grid.Column="0"
                       Width="12"
                       Height="7"
-                      HorizontalAlignment="Right"
-                      VerticalAlignment="Top"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      RenderTransformOrigin="0.5 0.5"
                       Stretch="Uniform"
                       Stroke="{StaticResource ForegroundBrush}"
                       StrokeThickness="1">
@@ -550,6 +554,9 @@
                             </PathFigure>
                         </PathGeometry>
                     </Path.Data>
+                    <Path.RenderTransform>
+                        <RotateTransform Angle="0" />
+                    </Path.RenderTransform>
                 </Path>
                 <ContentPresenter Grid.Column="0" />
             </Grid>
@@ -570,34 +577,18 @@
                 <VisualStateGroup x:Name="CheckStates">
                     <VisualState x:Name="Checked">
                         <Storyboard>
-                            <PointAnimation Storyboard.TargetName="P1"
-                                            Storyboard.TargetProperty="StartPoint"
-                                            To="0,8"
-                                            Duration="0:0:0.3" />
-                            <PointAnimation Storyboard.TargetName="P2"
-                                            Storyboard.TargetProperty="Point"
-                                            To="8,0"
-                                            Duration="0:0:0.3" />
-                            <PointAnimation Storyboard.TargetName="P3"
-                                            Storyboard.TargetProperty="Point"
-                                            To="16,8"
-                                            Duration="0:0:0.3" />
+                            <DoubleAnimation Storyboard.TargetName="Arrow"
+                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                             To="180"
+                                             Duration="0:0:0.3" />
                         </Storyboard>
                     </VisualState>
                     <VisualState x:Name="Unchecked">
                         <Storyboard>
-                            <PointAnimation Storyboard.TargetName="P1"
-                                            Storyboard.TargetProperty="StartPoint"
-                                            To="0,0"
-                                            Duration="0:0:0.3" />
-                            <PointAnimation Storyboard.TargetName="P2"
-                                            Storyboard.TargetProperty="Point"
-                                            To="8,8"
-                                            Duration="0:0:0.3" />
-                            <PointAnimation Storyboard.TargetName="P3"
-                                            Storyboard.TargetProperty="Point"
-                                            To="16,0"
-                                            Duration="0:0:0.3" />
+                            <DoubleAnimation Storyboard.TargetName="Arrow"
+                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                             To="0"
+                                             Duration="0:0:0.3" />
                         </Storyboard>
                     </VisualState>
                     <VisualState x:Name="Indeterminate">
@@ -638,7 +629,7 @@
                                 BorderThickness="1"
                                 CornerRadius="7">
                             <Grid>
-                                <ToggleButton Width="37"
+                                <ToggleButton Margin="0,7,10,0"
                                               HorizontalAlignment="Right"
                                               VerticalAlignment="Top"
                                               FocusVisualStyle="{x:Null}"
