@@ -32,10 +32,6 @@ namespace WebServer
     class ServerViewModel : ViewModelBase
     {
         private SimpleWebServer webServer;
-        private string folder;
-        private string hyperlink;
-        private bool isHyperlinkEnabled;
-        private bool sendFakeServer;
 
         ////////////////////////////////////////////////////////////////////
 
@@ -68,24 +64,24 @@ namespace WebServer
 
         public string Folder
         {
-            get => folder;
-            private set => SetProperty(ref folder, value);
+            get => field;
+            private set => SetProperty(ref field, value);
         }
 
         ////////////////////////////////////////////////////////////////////
 
         public string Hyperlink
         {
-            get => hyperlink;
-            private set => SetProperty(ref hyperlink, value);
+            get => field;
+            private set => SetProperty(ref field, value);
         }
 
         ////////////////////////////////////////////////////////////////////
 
         public bool IsHyperlinkEnabled
         {
-            get => isHyperlinkEnabled;
-            private set => SetProperty(ref isHyperlinkEnabled, value);
+            get => field;
+            private set => SetProperty(ref field, value);
         }
 
         ////////////////////////////////////////////////////////////////////
@@ -112,10 +108,10 @@ namespace WebServer
 
         public bool SendFakeServer
         {
-            get => sendFakeServer;
+            get => field;
             set
             {
-                SetProperty(ref sendFakeServer, value);
+                SetProperty(ref field, value);
                 webServer.SetFakeServer(Port, value);
             }
         }
@@ -182,10 +178,10 @@ namespace WebServer
                 var url = SimpleWebServer.FormatHostUri(Port) + filename;
                 Hyperlink = url;
                 Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
+                                {
+                                    FileName = url,
+                                    UseShellExecute = true
+                                });
             }
         }
 
@@ -193,7 +189,11 @@ namespace WebServer
 
         private void OnHyperlinkCommand()
         {
-            Process.Start(Hyperlink);
+            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = Hyperlink,
+                                UseShellExecute = true
+                            });
         }
     }
 }

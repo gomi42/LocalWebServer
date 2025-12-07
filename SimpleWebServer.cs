@@ -418,7 +418,7 @@ namespace WebServer
             myProcess.StartInfo.EnvironmentVariables.Add("REQUEST_URI", uri);
             myProcess.StartInfo.EnvironmentVariables.Add("SERVER_NAME", sendFakeServer ? "www.test.com" : "localhost");
             myProcess.StartInfo.EnvironmentVariables.Add("PHP_DOCUMENT_ROOT", rootDir.Replace('\\', '/'));
-
+            myProcess.StartInfo.StandardOutputEncoding = Encoding.UTF8;
             myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
             myProcess.Start();
