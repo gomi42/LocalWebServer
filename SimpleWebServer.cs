@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -44,11 +43,14 @@ namespace WebServer
         }
 
         private const string GomiTestServerStyle = "GomiTestServerStyle.css";
-        private const string PhpExeLocation = "php\\php.exe";
+        private const string PhpExeLocation = "php\\php-cgi.exe";
+        private const string PhpHost = "127.0.0.1";
+        private const int PhpPort = 9000;
         private const string LocalHost = "http://localhost";
 
         private WebApplication webApplication;
-        private string phpExecutable;
+        private FastCgiClient fastCgiClient;
+        private PhpCgiManager phpCgiManager;
         private Dictionary<int, ServerInfo> prefixRootMappings;
 
         ////////////////////////////////////////////////////////////////////
@@ -63,7 +65,7 @@ namespace WebServer
             prefixRootMappings = new Dictionary<int, ServerInfo>();
 
             var loc = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            phpExecutable = Path.Combine(loc, PhpExeLocation);
+            string phpExecutable = Path.Combine(loc, PhpExeLocation);
 
             if (!File.Exists(phpExecutable))
             {
@@ -84,6 +86,13 @@ namespace WebServer
                 {
                     phpExecutable = string.Empty;
                 }
+            }
+
+            if (!string.IsNullOrEmpty(phpExecutable))
+            {
+                phpCgiManager = new PhpCgiManager(phpExecutable, PhpHost, PhpPort);
+                phpCgiManager.Start();
+                fastCgiClient = new FastCgiClient(PhpHost, PhpPort);
             }
 
             var builder = WebApplication.CreateBuilder();
@@ -159,6 +168,7 @@ namespace WebServer
         public void Stop()
         {
             webApplication.StopAsync();
+            phpCgiManager.Stop();
         }
 
         ////////////////////////////////////////////////////////////////////
@@ -200,9 +210,9 @@ namespace WebServer
                 fileName = HtAccess.ApplyHtaccess(rootDir, url, fileName);
 
                 // 3: process PHP file?
-                if (!string.IsNullOrEmpty(phpExecutable) && Path.GetExtension(fileName).ToLower() == ".php")
+                if (fastCgiClient != null && Path.GetExtension(fileName).ToLower() == ".php")
                 {
-                    ExecutePhp(rootDir, fileName, url, serverInfo.SendFakeServer, out string result);
+                    string result = await fastCgiClient.ExecuteAsync(fileName, rootDir, url, serverInfo.SendFakeServer ? "www.test.com" : "localhost");
                     await SendStringAsResponse(result, ".html", response);
                     return;
                 }
@@ -400,35 +410,6 @@ namespace WebServer
             var e = WebUtility.UrlEncode(url);
             e = e.Replace("%2F", "/");
             return e;
-        }
-
-        ////////////////////////////////////////////////////////////////////
-
-        public int ExecutePhp(string rootDir, string phpFile, string uri, bool sendFakeServer, out string result)
-        {
-            Process myProcess = new Process();
-
-            myProcess.StartInfo.UseShellExecute = false;
-            myProcess.StartInfo.CreateNoWindow = true;
-            myProcess.StartInfo.FileName = phpExecutable;
-            myProcess.StartInfo.Arguments = $"-f {phpFile}";
-            myProcess.StartInfo.RedirectStandardOutput = true;
-            myProcess.StartInfo.WorkingDirectory = rootDir;
-            myProcess.StartInfo.EnvironmentVariables.Add("REQUEST_URI", uri);
-            myProcess.StartInfo.EnvironmentVariables.Add("SERVER_NAME", sendFakeServer ? "www.test.com" : "localhost");
-            myProcess.StartInfo.EnvironmentVariables.Add("PHP_DOCUMENT_ROOT", rootDir.Replace('\\', '/'));
-            myProcess.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-            myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-            myProcess.Start();
-            result = myProcess.StandardOutput.ReadToEnd();
-            myProcess.WaitForExit();
-
-            if (myProcess.ExitCode != 0)
-            {
-            }
-
-            return myProcess.ExitCode;
         }
     }
 }
