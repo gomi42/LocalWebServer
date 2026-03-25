@@ -21,7 +21,9 @@ namespace WebServer
         public void Start()
         {
             if (process != null && !process.HasExited)
+            {
                 return;
+            }
 
             var psi = new ProcessStartInfo
             {
@@ -33,7 +35,7 @@ namespace WebServer
                 CreateNoWindow = true
             };
 
-            // Environment-Variablen setzen
+            // set Environment-Variables
             foreach (var kv in env)
             {
                 psi.Environment[kv.Key] = kv.Value;

@@ -212,7 +212,7 @@ namespace WebServer
                 // 3: process PHP file?
                 if (fastCgiClient != null && Path.GetExtension(fileName).ToLower() == ".php")
                 {
-                    string result = await fastCgiClient.ExecuteAsync(fileName, rootDir, url, serverInfo.SendFakeServer ? "www.test.com" : "localhost");
+                    string result = await fastCgiClient.ExecuteAsync(fileName, rootDir, url, serverInfo.SendFakeServer ? "www.test.com" : "localhost", port);
                     await SendStringAsResponse(result, ".html", response);
                     return;
                 }

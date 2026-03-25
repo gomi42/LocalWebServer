@@ -57,6 +57,7 @@ namespace WebServer
                                                string rootDir,
                                                string uri,
                                                string serverName,
+                                               int port,
                                                string method = "GET",
                                                string query = "",
                                                string postData = "")
@@ -81,24 +82,25 @@ namespace WebServer
                 { "SERVER_PROTOCOL", "HTTP/1.1" },
 
                 { "REQUEST_URI", uri },
+                { "HTTP_HOST",  $"{serverName}:{port}"},
                 { "SERVER_NAME", serverName },
-                { "PHP_DOCUMENT_ROOT", rootDir.Replace('\\', '/') }
+                { "DOCUMENT_ROOT", rootDir.Replace('\\', '/') }
             };
 
             var paramBytes = EncodeNameValuePairs(parameters);
             await SendRecord(stream, FcgiType.Params, requestId, paramBytes);
 
-            // PARAMS Ende
+            // PARAMS End
             await SendRecord(stream, FcgiType.Params, requestId, Array.Empty<byte>());
 
-            // STDIN (POST-Daten)
+            // STDIN (POST-Data)
             var stdinBytes = Encoding.UTF8.GetBytes(postData);
             await SendRecord(stream, FcgiType.Stdin, requestId, stdinBytes);
 
-            // STDIN Ende
+            // STDIN End
             await SendRecord(stream, FcgiType.Stdin, requestId, Array.Empty<byte>());
 
-            // Antwort lesen
+            // read response
             return await ReadResponse(stream);
         }
 
@@ -124,7 +126,9 @@ namespace WebServer
             await stream.WriteAsync(headerBytes, 0, headerBytes.Length);
 
             if (content.Length > 0)
+            {
                 await stream.WriteAsync(content, 0, content.Length);
+            }
         }
 
         private async Task<string> ReadResponse(NetworkStream stream)
@@ -219,18 +223,18 @@ namespace WebServer
             return ms.ToArray();
         }
 
-        private static void WriteLength(Stream s, int length)
+        private static void WriteLength(Stream stream, int length)
         {
             if (length < 128)
             {
-                s.WriteByte((byte)length);
+                stream.WriteByte((byte)length);
             }
             else
             {
-                s.WriteByte((byte)((length >> 24) | 0x80));
-                s.WriteByte((byte)(length >> 16));
-                s.WriteByte((byte)(length >> 8));
-                s.WriteByte((byte)length);
+                stream.WriteByte((byte)((length >> 24) | 0x80));
+                stream.WriteByte((byte)(length >> 16));
+                stream.WriteByte((byte)(length >> 8));
+                stream.WriteByte((byte)length);
             }
         }
     }
